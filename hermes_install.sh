@@ -5,8 +5,16 @@
 
 set -e
 
-echo "***********THEVOIDKERNEL****************"
-echo "🚀 Installing Hermes Agent on Termux..."
+echo -e "${CYN}==========================================================${RST}"
+echo -e "${GRN}                   THEVOIDKERNEL"
+echo -e "${CYN}==========================================================${RST}"
+
+echo -e "${CYN}==========================================================${RST}"
+echo -e "${GRN}        🚀 Installing Hermes Agent on Termux..."
+echo -e "${CYN}==========================================================${RST}"
+
+echo "📦 Repository: https://github.com/AbuZar-Ansarii/Hermes-Agent-On-Android"
+
 
 # Update packages
 pkg update && pkg upgrade -y
