@@ -5,6 +5,13 @@
 
 set -e
 
+# Colors
+RED='\033[0;31m'
+GRN='\033[0;32m'
+YLW='\033[1;33m'
+CYN='\033[0;36m'
+RST='\033[0m'
+
 echo -e "${CYN}=====================================================${RST}"
 echo -e "${GRN}                   THEVOIDKERNEL"
 echo -e "${CYN}=====================================================${RST}"
@@ -35,16 +42,30 @@ source venv/bin/activate
 # Set Android API level
 export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk)"
 
-# Upgrade pip tools
+echo -e "${YLW}Upgrading pip tools...${RST}"
+
 python -m pip install --upgrade pip setuptools wheel
 
+python -m pip install -e '.[termux]' \
+-c constraints-termux.txt \
+--no-deps
 # Install Hermes with Termux support
-python -m pip install -e '.[termux]' -c constraints-termux.txt
+python -m pip install \
+cython \
+numpy \
+wheel
+
+
 
 # Create global symlink
 ln -sf "$PWD/venv/bin/hermes" "$PREFIX/bin/hermes"
 
-echo "✅ Hermes Agent installed successfully!"
+echo ""
+echo -e "${GRN}=====================================================${RST}"
+echo -e "${GRN}     ✅ Hermes Agent Installed Successfully${RST}"
+echo -e "${GRN}=====================================================${RST}"
+
+echo ""
 echo "🔥 Run 'hermes' or 'hermes setup' to start using it"
 echo "📖 Type 'hermes --help' for more options"
 echo ""
