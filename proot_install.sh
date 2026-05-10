@@ -1,64 +1,110 @@
-#!/bin/bash
+#!/data/data/com.termux/files/usr/bin/bash
 
-# Hermes Agent - Error-Free Termux Installer
-# Optimized for THEVOIDKERNEL (Rishikesh Build)
+# =====================================================
+# Hermes Agent Installer for Termux (Android)
+# Fixed psutil + Android compatibility
+# =====================================================
 
-# 1. FORCE FIX BROKEN DPKG (Run this to clear the "EOF" error)
-echo "🛠️ Repairing broken package database..."
-export DEBIAN_FRONTEND=noninteractive
-dpkg --configure -a --force-confdef --force-confold
-
-# 2. Setup environment to bypass all future prompts
 set -e
-export DEBIAN_FRONTEND=noninteractive
-APT_OPTS="-y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold'"
 
 # Colors
-CYN='\033[0;36m'
+RED='\033[0;31m'
 GRN='\033[0;32m'
+YLW='\033[1;33m'
+CYN='\033[0;36m'
 RST='\033[0m'
 
+clear
+
 echo -e "${CYN}=====================================================${RST}"
-echo -e "${GRN}                THEVOIDKERNEL"
+echo -e "${GRN}              HERMES AGENT INSTALLER"
 echo -e "${CYN}=====================================================${RST}"
 
-# 3. Update with forced non-interactive flags
-echo "📦 Updating system packages (Silently)..."
-apt update $APT_OPTS
-apt upgrade $APT_OPTS
+echo -e "${YLW}Updating Termux packages...${RST}"
 
-# 4. Install Dependencies (Including pre-built psutil)
-echo "📥 Installing core dependencies..."
-apt install $APT_OPTS python python-psutil git clang rust make pkg-config libffi openssl nodejs ripgrep ffmpeg
+pkg update -y
+pkg upgrade -y
 
-# 5. Clone or Update Hermes
-if [ -d "hermes-agent" ]; then
-    echo "🔄 Existing installation found. Pulling latest code..."
-    cd hermes-agent && git pull && cd ..
-else
-    echo "🌐 Cloning Hermes Agent..."
-    git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.git
-fi
+echo -e "${YLW}Installing required dependencies...${RST}"
+
+pkg install -y \
+git \
+python \
+python-dev \
+clang \
+rust \
+make \
+pkg-config \
+libffi \
+openssl \
+nodejs \
+ripgrep \
+ffmpeg \
+libandroid-spawn \
+cmake
+
+echo -e "${YLW}Cleaning old installation if exists...${RST}"
+
+rm -rf hermes-agent
+rm -rf ~/.cache/pip
+
+echo -e "${YLW}Cloning Hermes repository...${RST}"
+
+git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.git
 
 cd hermes-agent
 
-# 6. Virtual Environment Setup (System-Linked)
-echo "🐍 Setting up Python environment..."
-rm -rf venv
-python -m venv venv --system-site-packages
+echo -e "${YLW}Creating Python virtual environment...${RST}"
+
+python -m venv venv
+
 source venv/bin/activate
 
-# 7. Install Python Requirements
-export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk)"
+echo -e "${YLW}Upgrading pip tools...${RST}"
+
 python -m pip install --upgrade pip setuptools wheel
-echo "🏗️ Installing Hermes packages..."
+
+# -----------------------------------------------------
+# FIX FOR TERMUX / ANDROID
+# -----------------------------------------------------
+
+echo -e "${YLW}Installing Android compatible dependencies...${RST}"
+
+# Pin working psutil version
+python -m pip install "psutil==5.9.8"
+
+# Optional helpful packages
+python -m pip install \
+cython \
+numpy \
+wheel
+
+# Android API level
+export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk)"
+
+echo -e "${YLW}Installing Hermes Agent...${RST}"
+
 python -m pip install -e '.[termux]' -c constraints-termux.txt
 
-# 8. Finalize Symlink
+echo -e "${YLW}Creating global command symlink...${RST}"
+
 ln -sf "$PWD/venv/bin/hermes" "$PREFIX/bin/hermes"
 
-echo -e "${GRN}✅ SUCCESS: Hermes Agent is ready!${RST}"
-echo "-----------------------------------------------------"
-echo "👉 Run 'hermes setup' to begin."
-echo "👉 Run 'hermes gateway' for Telegram."
-echo "-----------------------------------------------------"
+echo ""
+echo -e "${GRN}=====================================================${RST}"
+echo -e "${GRN}     ✅ Hermes Agent Installed Successfully!${RST}"
+echo -e "${GRN}=====================================================${RST}"
+echo ""
+
+echo -e "${CYN}Usage:${RST}"
+echo "hermes"
+echo "hermes setup"
+echo "hermes --help"
+echo "hermes gateway"
+
+echo ""
+echo -e "${YLW}Repository:${RST}"
+echo "https://github.com/NousResearch/hermes-agent"
+
+echo ""
+echo -e "${GRN}Done.${RST}"
