@@ -83,6 +83,10 @@ Run for using it
 ```
 hermes
 ```
+## Start gateway
+```
+hermes gateway
+```
 
 ## ⚙️ System Requirements
 
